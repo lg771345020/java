@@ -50,8 +50,161 @@ DriverManager: 管理一组 jdbc 的操作
 ```java
 import java.util.ResourceBundle;
 
+//①获取 ResourceBundle 对象
 ResourceBundle bundle = ResourceBundle.getBundle("jdbc");
+
+//①通过 ResourceBundle 对象获取配置信息
 String driverClass = bundle.getString("driverClass");
 ```
+
+### 实例，建立 mysql 数据库的连接
+
+创建 jdbc.properties 文件
+
+```java
+driverClass=com.mysql.jdbc.Driver
+url=jdbc\:mysql\://localhost\:3306/test
+user=root
+password=root
+```
+
+创建 jdbc.java 文件
+
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ResourceBundle;
+
+import org.junit.Test;
+
+
+public class jdbcUtils {
+
+	static final String DRIVERCLASS, URL, USER, PASSWORD;
+
+	//静态代码块，加载代码时运行，只执行一次人
+	static {
+		ResourceBundle bundle = ResourceBundle.getBundle("jdbc");
+		DRIVERCLASS = bundle.getString("driverClass");
+		URL = bundle.getString("url");
+		USER = bundle.getString("user");
+		PASSWORD = bundle.getString("password");
+		System.out.println(DRIVERCLASS);
+	}
+
+	static {
+		//连接驱动
+		try {
+			Class.forName(DRIVERCLASS);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public static Connection getConnection() throws SQLException {
+		//建立连接
+		return DriverManager.getConnection(URL, USER, PASSWORD);
+	}
+
+	public static void closeResource(Connection conn, Statement st, ResultSet rs) {
+		closeResultSet(rs);
+		closeStatement(st);
+		closeConn(conn);
+	}
+
+	/**
+	 * 释放连接
+	 * @param conn
+	 */
+	public static void closeConn(Connection conn) {
+		if(conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			conn = null;
+		}
+	}
+
+	/**
+	 * 释放语句执行者
+	 * @param st
+	 */
+	public static void closeStatement(Statement st) {
+		if(st != null) {
+			try {
+				st.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			st = null;
+		}
+	}
+
+	/**
+	 * 释放结果集
+	 * @param rs
+	 */
+	public static void closeResultSet(ResultSet rs) {
+		if(rs != null) {
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			rs = null;
+		}
+	}
+
+	@Test
+	public void f() {
+		Connection conn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			conn = jdbcUtils.getConnection();
+
+			//创建 sql
+			String sql = "insert into users (name) values (?)";
+
+			//获取语句执行者
+			st = conn.prepareStatement(sql);
+
+			//设置参数
+			st.setString(1, "sss");
+
+			//执行 sql
+			int i = st.executeUpdate();
+
+			//处理结果
+			if(i == 1) {
+				System.out.println("success");
+			} else {
+				System.out.println("fail");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			//关闭连接资源
+			jdbcUtils.closeResource(conn, st, rs);
+		}
+	}
+}
+```
+
+
+## 连接池
+
+使用 jdbc 时，每次操作都需要获取连接(创建)，用完之后把连接释放(销毁)，通过连接池来优化
 
 
