@@ -207,4 +207,61 @@ public class jdbcUtils {
 
 使用 jdbc 时，每次操作都需要获取连接(创建)，用完之后把连接释放(销毁)，通过连接池来优化
 
+**实现一个自定义的最简单连接池**
+
+```java
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.LinkedList;
+
+/**
+ * 最简单的连接池
+ */
+public class MyDataSource {
+    //LinkedList 增删快，查询慢
+    static LinkedList<Connection> pool = new LinkedList<>();
+
+    static {
+        //初始化的时候需要放入3个连接池
+        for(int i = 0; i< 3; i++) {
+            try {
+                Connection conn = jdbcUtils.getConnection();
+                pool.addLast(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //获取连接
+    public static Connection getConnection() {
+        if(pool.isEmpty()) {
+            for(int i = 0; i< 3; i++) {
+                try {
+                    Connection conn = jdbcUtils.getConnection();
+                    pool.addLast(conn);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.out.println("创建一个连接");
+        return pool.removeFirst();
+    }
+
+    //归还连接池方法
+    public static void addBack(Connection conn) {
+        System.out.println("已经归还连接");
+        pool.addLast(conn);
+    }
+}
+```
+
+## 增强方法
+
+* 继承/实现
+
+* 装饰者模式(静态代理)
+
+* 动态代理
 
