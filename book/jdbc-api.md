@@ -221,8 +221,8 @@ public class MyDataSource {
     //LinkedList 增删快，查询慢
     static LinkedList<Connection> pool = new LinkedList<>();
 
+    //初始化连接池，放入3个连接
     static {
-        //初始化的时候需要放入3个连接池
         for(int i = 0; i< 3; i++) {
             try {
                 Connection conn = jdbcUtils.getConnection();
@@ -245,11 +245,11 @@ public class MyDataSource {
                 }
             }
         }
-        System.out.println("创建一个连接");
+        System.out.println("获取连接");
         return pool.removeFirst();
     }
 
-    //归还连接池方法
+    //归还连接
     public static void addBack(Connection conn) {
         System.out.println("已经归还连接");
         pool.addLast(conn);
@@ -262,6 +262,14 @@ public class MyDataSource {
 * 继承/实现
 
 * 装饰者模式(静态代理)
+
+    * 装饰者和被装饰者实现同一个接口或者继承同一个类
+
+    * 装饰者中要有被装饰者的引用
+
+    * 对需要的增强的方法进行加强
+
+    * 对不需要的方法调用原来的方法
 
 * 动态代理
 
