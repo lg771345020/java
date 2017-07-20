@@ -172,3 +172,48 @@ servlet 生命周期的四个阶段：
 ### jsp(java server page) java 服务器端动态页面
 
 sun 公司制订的一种服务器端的动态页面生成技术规范。jsp 是一个以 .jsp 为后缀的文件，容器会自动将 .jsp 文件转换成一个 .java 文件(其实就是一个 servlet)，然后调用 servlet。所以本质上，jsp 就是一个 servlet 。
+
+转发：将一个 web 组件(servlet/jsp)未完成的事交给另一个 web 组件继续完成。通常由 servlet 处理数据，jsp 展现数据。
+
+如何转发？
+
+step1 绑定数据到 request
+
+resquest.setAttribute(String name, Object obj)
+
+step2 获得转发器
+
+//url: 要转发给哪一个 web 组件
+RequestDispatcher rd = request.RequestDispatcher(String url)
+
+step3 转发
+
+rd.forward(request, response)
+
+step4 在 jsp 获取绑定值
+
+//如果name对应的值不存在，返回null
+Object request.getAttribute(String name)
+
+
+## 监听器
+
+servlet 规范当中定义的一种特殊的组件，用来监听容器产生的事件并进行处理。
+
+容器会产生两大类事件：
+
+* 生命周期相关的事件：容器在创建或者销毁 request, session, servletContext(servlet 上下文)时产生的事件。
+
+* 绑定相关的事件：容器调用了 request, session, servletContext 的 setAttribute, removeAttribute 时产生的事件。
+
+1、如何实现一个监听器
+
+* 写一个 java 类，实现监听器接口(依据监听的事件类型来选择对应的接口)
+
+* 在监听器接口定义的方法里，编写处理逻辑。
+
+* 配置
+
+2、ServletContext
+
+容器在启动的时候会为每个应用创建唯一的一个符合 ServletContext 接口要求的对象(Servlet 上下文)，该对象一起存在，除非容器关闭。
