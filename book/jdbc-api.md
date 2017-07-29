@@ -61,7 +61,7 @@ String driverClass = bundle.getString("driverClass");
 
 创建 jdbc.properties 文件
 
-```java
+```
 driverClass=com.mysql.jdbc.Driver
 url=jdbc\:mysql\://localhost\:3306/test
 user=root

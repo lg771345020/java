@@ -33,7 +33,22 @@ AOP 是 `Aspect Oriented Programming` 的缩写，即，面向切面编程
 ```java
 
 ```
-第一步：新建 demo4_aop/applicationContext.xml 配置文件，添加以下内容
+
+第一步：导入 jar 包
+
+* Spring 框架基本开发包(4个核心包+2个日志包)
+
+* Spring 框架的 AOP 的开发包
+
+    * spring 的传统 AOP 的开发的包
+        * spring-aop-4.2.4.RELEASE.jar
+        * com.springsource.org.aopalliance-1.0.0.jar
+    
+    * aspectJ 的开发包
+        * com.springsource.org.aspectj.weaver-1.6.8.RELEASE.jar
+        * spring-aspects-4.2.4.RELEASE.jar
+
+第二步：新建 demo4_aop/applicationContext.xml 配置文件，添加以下内容
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -58,7 +73,7 @@ AOP 是 `Aspect Oriented Programming` 的缩写，即，面向切面编程
 </beans>
 ```
 
-第二步：新建 demo4_aop.AspactAnno.java 文件，添加以下内容
+第三步：新建 demo4_aop.AspactAnno.java 文件，添加以下内容
 
 ```java
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -86,7 +101,7 @@ public class AspactAnno {
     @Pointcut(value="execution(* demo4_aop.UserDaoImpl.save())")
     public void save() {}
 
-    //4、@Around 环绕
+    //5、@Around 环绕
     @Around(value="execution(* demo4_aop.UserDaoImpl.update())")
     public void updateAround(ProceedingJoinPoint joinPoint) {
         System.out.println("do something around update1");
