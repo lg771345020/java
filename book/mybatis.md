@@ -290,7 +290,7 @@ map | Map
 ```xml
 <select id="findUsersByIds" parameterType="com.herolei.pojo.QueryVo" resultType="com.herolei.pojo.User">
     SELECT * FROM user
-    <where>
+    <where>             
       <!--foreach参数
         collection: 要循环的集合
         item: 循环的每一项
