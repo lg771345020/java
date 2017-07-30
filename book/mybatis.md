@@ -286,7 +286,7 @@ map | Map
 ```
 
 #### 9.3 foreach
-
+           
 ```xml
 <select id="findUsersByIds" parameterType="com.herolei.pojo.QueryVo" resultType="com.herolei.pojo.User">
     SELECT * FROM user
