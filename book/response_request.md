@@ -2,12 +2,10 @@
 
 ### Response 设置状态码：
 
-```
-//1、设置状态码
-response.setState(200)
-//2、设置错误状态码，针对4xx和5xx
-response.setError(404)
-```
+    //1、设置状态码
+    response.setState(200)
+    //2、设置错误状态码，针对4xx和5xx
+    response.setError(404)
     
 ### Response 设置响应头：
 
@@ -22,30 +20,33 @@ addHeader(String key, String value) | 设置响应头，没有设置则设置，
 addIntHeader(String key, int value) | 设置整数响应头
 addDateHeader(String key, long value) | 设置时间响应头
 
-例子：
+### Response 重定向：
 
-```
-//1、重定向方式一：
-//res.setStatus(302);
-//res.setHeader("location", "https://github.com/");
+    1、重定向方式一：
+    res.setStatus(302);
+    res.setHeader("location", "https://github.com/");
+  
+    2、重定向方式二：
+    res.sendRedirect("https://github.com/");
 
-//2、重定向方式二：
-//res.sendRedirect("https://github.com/");
+### Response 定时刷新：
 
-//3、刷新
-//res.setHeader("refresh", "3;url=https://github.com/");
+    res.setHeader("refresh", "3;url=https://github.com/");
+    
+### Response 操作响应体：
+    
+    //字符流
+    PrintWriter out = res.getWriter();
+    out.println("哈哈");
+    
+    //字节流，两个流只能使用一个
+    OutputStream out = res.getOutputStream();
+    out.write("哈哈".getBytes("utf-8"));
+    
+### Response 中文乱码：
 
-//4、中文乱码
-//res.setHeader("Content-Type", "text/html;charset=UTF-8");
-res.setContentType("text/html;charset=UTF-8");
-
-//5、输出
-//PrintWriter out = res.getWriter();//字符流
-//out.println("哈哈");
-
-OutputStream out = res.getOutputStream();//字节流，两个流只能使用一个
-out.write("哈哈".getBytes("utf-8"));
-```
+    res.setHeader("Content-Type", "text/html;charset=UTF-8");
+    res.setContentType("text/html;charset=UTF-8");
 
 ### Response 文件下载：
 
