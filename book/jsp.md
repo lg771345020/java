@@ -2,6 +2,78 @@
 
 jsp 本质就是一个 servlet
 
+### jsp 指令：
+
+### page指令: 声明jsp页面的一些属性
+
+    <%@ page language="java" contentType="text/html; charset=utf-8" %>
+
+* `contentType` 设置浏览器默认的打开的时候的编码。
+
+* `pageEncoding` 设置 JSP 文件保存到硬盘，以及翻译成 Servlet 保存到硬盘的编码格式。
+
+* `import` 设置JSP中引入其他的类，import 属性可以出现多次的。
+
+* `language` JSP的语言的属性.现在只能是 java。
+
+* `extends` 设置JSP被翻译成 Servlet 后继承的类。默认值 `org.apache.jasper.runtime.HttpJspBase` 。修改这个值得话一定要使这个类是一个 Servlet 才可以。
+
+* `autoFlush` 设置自动刷出缓存
+
+* `buffer` JSP 的缓冲区的大小。默认 8kb 。
+
+* `session` 默认值是 true 。设置 JSP 的页面中是否可以直接使用session对象。
+
+* `isELIgnored` 设置 JSP 是否忽略 EL 表达式.默认值 false 不忽略.可以在 JSP 中写 EL 表达式。
+
+* `isErrorPage` 设置 JSP 页面中出现错误信息应该如何处理的。
+
+* `errorPage` 设置 JSP 页面中出现错误信息应该如何处理的。
+
+### include指令: 用于引入其他的页面
+
+      <%@ include file="logo.jsp" %>
+
+* `file` 属性中不能使用变量，不能传递参数
+
+### taglib指令：用于在JSP中引入标签库
+
+      <%@ taglib uri="名称空间" prefix="前缀" %>
+
+### jsp 9大内置对象 ☆☆☆
+
+jsp 页面上可以直接使用的对象
+
+对象 | 说明 | 
+---- | ---- | ----
+`out` | JspWriter | 
+`request` | HttpServletRequest |
+`response` | HttpServletResponse |
+`session` | HttpSession |
+`exception` | Throwable |
+`page` | Servlet(this) |
+`pageContext` | pageContext |
+`config` | ServletConfig |
+`application` | ServletContext | 
+
+### 	JSP的四个域对象：
+
+对象 | 作用范围 | 说明
+---- | ---- | ---
+pageContext | pageScope | 页面范围			
+request | requestScope | 请求范围
+session | sessionScope | 会话范围
+application | applicationScope | 应用范围
+
+
+### jsp 脚本：
+
+* `<%  ... %>` java 代码片段
+
+* `<%= ... %>` 输出变量
+
+* `<%! ... %>` 声明变量
+
 访问index.jsp
 
 ```jsp
