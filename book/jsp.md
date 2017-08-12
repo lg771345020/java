@@ -412,6 +412,37 @@ public class Person {
 
 * 关系运算：`&&`、`||`、`!`
 
+例子：
+
+```jsp
+<%@ page import="com.herolei.controller.Person" %>
+<%@ page language="java" contentType="text/html; charset=utf-8" %>
+<h1>EL执行运算</h1>
+
+<h3>EL执行算数运算</h3>
+<%
+    pageContext.setAttribute("n1", "10");
+    pageContext.setAttribute("n2", "20");
+    pageContext.setAttribute("n3", "40");
+    pageContext.setAttribute("n4", "60");
+%>
+${ n1+n2+n3 }
+
+<h3>EL执行逻辑运算</h3>
+${ n1 < n2 }
+${ n1 > n2 }
+
+<h3>EL执行关系运算</h3>
+${ n1<n2 && n3<n4 }
+${ n1<n2 || n3<n4 }
+<%
+    Person person = new Person();
+    pageContext.setAttribute("person", person);
+%>
+${ empty person }
+${ not empty person }
+```
+
 ### EL内置对象
 
 对象 | 说明
