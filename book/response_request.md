@@ -168,3 +168,23 @@ GET/POST 请求，参数使用 `utf-8` 编码，服务器(Tomcat)接受请求后
     //%E7%8E%8B%E4%BA%94
     String decode = URLDecoder.decode("%E7%8E%8B%E4%BA%94", "utf-8")
     //王五
+
+### 转发和重定向的区别：
+
+【重定向】
+
+    response.sendRedirect(String path);
+
+【转发】
+
+    request.getRequestDispatcher(String path).forward(request,response);
+    
+【区别】
+
+1. 转发的地址栏不变的；重定向的地址栏发生变化的。
+
+2. 转发是一次请求一次响应；重定向是两次请求两次响应。
+
+3. request 域对象存取的值在转发中是有效的；在重定向无效的。
+
+4. 转发的路径不需要加工程名；重定向的路径需要加工程名。
