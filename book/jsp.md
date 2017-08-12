@@ -285,7 +285,103 @@ ${属性名}依次从pageContext, request, session, application查找指定的�
     
 * javabean 导航 `${域中javabean名称.bean属性}`
 
-**javabean 规范：**
+例子：
+
+```java
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="com.herolei.bean.Person" %>
+<%@ page language="java" contentType="text/html; charset=utf-8" %>
+<h1>EL获取数据</h1>
+<%
+    pageContext.setAttribute("pname", "王守义");
+    request.setAttribute("rname", "王凤儿");
+    session.setAttribute("sname", "王如花");
+    application.setAttribute("aname", "王芙蓉");
+%>
+<h3>传统方式</h3>
+<%= pageContext.getAttribute("pname")%>
+<%= request.getAttribute("rname")%>
+<%= session.getAttribute("sname")%>
+<%= application.getAttribute("aname")%>
+<h3>EL的方式</h3>
+${ pageScope.pname }
+${ requestScope.rname }
+${ sessionScope.sname }
+${ applicationScope.aname }
+<hr/>
+<%
+    //pageContext.setAttribute("name", "王守义");
+    //request.setAttribute("name", "王凤儿");
+    session.setAttribute("name", "王如花");
+    application.setAttribute("name", "王芙蓉");
+%>
+${ name }
+<h3>EL获得数组的数据</h3>
+<%
+    String[] arrs = {"王守义","王如花","王凤儿"};
+    pageContext.setAttribute("arrs", arrs);
+%>
+${ arrs[1] }
+
+<h3>EL获得List集合的数据</h3>
+<%
+    List<String> list = new ArrayList<String>();
+    list.add("aaa");
+    list.add("bbb");
+    list.add("ccc");
+    pageContext.setAttribute("list", list);
+%>
+${ list[1] }
+
+<h3>获得Map集合的数据</h3>
+<%
+    Map<String,String> map = new HashMap<String,String>();
+    map.put("aaa", "111");
+    map.put("bbb", "222");
+    map.put("ccc.ddd", "333");
+    pageContext.setAttribute("map", map);
+%>
+${ map["ccc.ddd"] }
+
+<h3>EL获得JavaBean中的数据</h3>
+<%
+    Person person = new Person();
+    person.setId(1);
+    person.setName("王美丽");
+    pageContext.setAttribute("person", person);
+%>
+${ person.name }
+```
+
+Person 即为一个 javabean 对象
+
+```java
+public class Person {
+    private int id;
+    private String name;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+**补充：javabean 规范：**
 
 * 必须是一个公共的具体的类 public class
 
@@ -301,9 +397,41 @@ ${属性名}依次从pageContext, request, session, application查找指定的�
 ```
     //一旦有公共的方法后，get|set|is后的内容，将首字母小写，称之为bean属性
     //name 就是一个bean属性
-    public String getName() {...}
+    public String getName() { return username; }
 ```   
 
 * 提供一个无参构造器
 
 * 一般实现序列化接口 Serializable
+
+### EL执行运算
+
+* 算数运算：`+`、`-`、`*`、`/`、`%`
+
+* 逻辑运算：`>`、`>=`、`<`、`<=`、`==`、`!=`、`empty`
+
+* 关系运算：`&&`、`||`、`!`
+
+### EL内置对象
+
+对象 | 说明
+---- | ----
+${pageScope} | pageScope
+${requestScope} | requestScope
+${sessionScope} | sessionScope
+${applicationScope} | applicationScope
+${ param } | 相当于 request.getParameter()
+${ paramValues } | 相当于 request.getParameterValues()
+${ header } | 获得请求头，一个 key 对应一个 value
+${ headerValues } | 获得请求头，一个 key 对应多个v alue 
+${ initParam } | 获得初始化参数
+${ cookie } | 获得 Cookie 的信息
+${pageContext} | 相当于 pageContext 对象
+
+例子：
+
+```jsp
+//项目名称
+${pageContext.request.contextPath}
+```
+
