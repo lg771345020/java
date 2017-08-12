@@ -272,22 +272,18 @@ public final class index_jsp extends org.apache.jasper.runtime.HttpJspBase
 
 * 获取简单数据
 
+```
+${pageScopt|requestScope|sessionScope|applicationScope.属性名} 
+${属性名}依次从pageContext, request, session, application查找指定的属性，若无则返回""
+```
 
-    ${pageScopt|requestScope|sessionScope|applicationScope.属性名} 
-    ${属性名}依次从pageContext, request, session, application查找指定的属性，若无则返回""
+* 获取数组中的数据 `${域中的名称[index]}`
 
-* 获取复杂数据
+* 获取list中的数据 `${域中的名称[index]}`
 
-    * 获取数组中的数据 ${域中的名称[index]}
+* 获取map中的数据 `${域中的名称.键名}`
     
-    * 获取list中的数据 ${域中的名称[index]}
-    
-    * 获取map中的数据 ${域中的名称.键名}
-    
-* javabean 导航
-
-
-    ${域中javabean名称.bean属性}
+* javabean 导航 `${域中javabean名称.bean属性}`
 
 **javabean 规范：**
 
