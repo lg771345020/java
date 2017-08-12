@@ -159,7 +159,7 @@ public class Servlet1 extends HttpServlet {
  
 * POST 请求：参数在请求体中，服务器(Tomcat)使用 `ISO-8859-1` 解码
 
-
+```
     //1、get/post请求
     new String(name.getBytes("ISO-8859-1"), "utf-8");
     
@@ -171,3 +171,4 @@ public class Servlet1 extends HttpServlet {
     //%E7%8E%8B%E4%BA%94
     String decode = URLDecoder.decode("%E7%8E%8B%E4%BA%94", "utf-8")
     //王五
+```
