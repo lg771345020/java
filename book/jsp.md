@@ -466,3 +466,87 @@ ${pageContext} | 相当于 pageContext 对象
 ${pageContext.request.contextPath}
 ```
 
+## JSTL的标签库
+
+使用步骤：
+
+1. 导入 jar 包(jstl.jar 和 standard.jar)
+
+2. 在页面上导入标签库 `<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>`
+
+例子：
+
+```jsp
+<%@ page import="java.util.*" %>
+<%@ page language="java" contentType="text/html; charset=utf-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<h1>1、if标签</h1>
+<c:if test="${ 6 > 5 }">
+    哈哈
+</c:if>
+
+<h1>2、forEach标签</h1>
+<c:forEach begin="1" end="20" step="2" var="i" varStatus="vs">
+    ${i}-${vs.count}-${vs.current}<br>
+</c:forEach>
+
+<h1>forEach遍历list</h1>
+<%
+    List list = new ArrayList();
+    list.add(1);
+    list.add(2);
+    list.add(3);
+    request.setAttribute("list", list);
+%>
+<c:forEach items="${list}" var="n">
+    ${n}<br>
+</c:forEach>
+
+<h1>forEach遍历set</h1>
+<%
+    Set set = new HashSet();
+    set.add(1);
+    set.add(2);
+    set.add(3);
+    request.setAttribute("set", set);
+%>
+<c:forEach items="${set}" var="n">
+    ${n}<br>
+</c:forEach>
+
+<h1>forEach遍历map</h1>
+<%
+    Map map = new HashMap();
+    map.put("name", "join");
+    map.put("age", "20");
+    map.put("salary", "2000");
+    request.setAttribute("map", map);
+%>
+<c:forEach items="${map}" var="en" varStatus="vs">
+    ${en.key}-${en.value}-${vs.count}<br>
+</c:forEach>
+
+<h1>3、set</h1>
+<%--默认相当于pageContext.setAttribute("name", "Tom")--%>
+<c:set var="name" value="Tom" scope="page"/>
+
+<h1>choose</h1>
+<c:choose>
+    <c:when test="${name=='join'}">
+        join
+    </c:when>
+    <c:when test="${name=='tom'}">
+        tom
+    </c:when>
+    <c:otherwise>
+        default
+    </c:otherwise>
+</c:choose>
+
+<h1>4、fn函数库</h1>
+${ fn:length("HelloWorld") }
+${ fn:toLowerCase("ABCDEFG") }
+${ fn:toUpperCase("abcdefg") }
+${ fn:contains("www.baidu.com","baidu") }
+```
