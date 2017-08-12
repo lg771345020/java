@@ -211,7 +211,7 @@ GET/POST 请求，参数使用 `utf-8` 编码，服务器(Tomcat)接受请求后
                
 * `URIEncoding` GET 请求编码方式，默认 iso-8859-1 
 
-* `useBodyEncodingForURI` 在 Tomcat4 中 GET/POST 的编码是一样的，所以只要在过滤器中通过 request.setCharacterEncoding 设定一次就可以解决 GET/POST 的问题。然而，在 Tomcat 高版本中，GET/POST 的处理是分开进行的，GET 请求通过 URIEncoding 进行处理，POST 请求通过 request.setCharacterEncoding 处理，为了保持兼容，就有了这个设定。
+* `useBodyEncodingForURI` 在 Tomcat4 中 GET/POST 的编码是一样的，所以只要在过滤器中通过 request.setCharacterEncoding 设定一次就可以解决编码问题。然而，在 Tomcat 高版本中，GET/POST 的处理是分开的，GET 请求通过 URIEncoding 进行处理，POST 请求通过 request.setCharacterEncoding 处理，为了保持兼容，就有了这个设定。
 
 ### 转发和重定向的区别：
 
