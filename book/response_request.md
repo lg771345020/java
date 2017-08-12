@@ -51,6 +51,7 @@ addDateHeader(String key, long value) | 设置时间响应头
 ### Response 文件下载：
 
 ```java
+import sun.misc.BASE64Encoder;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -58,21 +59,37 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URLEncoder;
 
 public class DownloadServlet extends HttpServlet {
 
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        String filename = "1.txt";
+        String filename = req.getParameter("filename");
+        filename = new String(filename.getBytes("iso8859-1"),"utf-8");
+        
         ServletContext context = this.getServletContext();
         //文件下载
         //1、设置文件mimeType
         String mimeType = context.getMimeType(filename);
-        System.out.println(mimeType);
         res.setContentType(mimeType);
 
         //2、设置下载的头信息
-        res.setHeader("content-disposition", "attachment;filename=" + filename);
+        String agent = req.getHeader("user-agent");
+        System.out.println(agent);
+        if (agent.contains("MSIE")) {
+            // IE浏览器
+            filename = URLEncoder.encode(filename, "utf-8");
+            filename = filename.replace("+", " ");
+        } else if (agent.contains("Firefox")) {
+            // 火狐浏览器
+            BASE64Encoder base64Encoder = new BASE64Encoder();
+            filename = "=?utf-8?B?" + base64Encoder.encode(filename.getBytes("utf-8")) + "?=";
+        } else {
+            // 其它浏览器
+            filename = URLEncoder.encode(filename, "utf-8");
+        }
+
+        res.setHeader("Content-Disposition", "attachment;filename=" + filename);
 
         //3、对拷流
         //输入流
@@ -168,18 +185,45 @@ GET/POST 请求，参数使用 `utf-8` 编码，服务器(Tomcat)接受请求后
     //%E7%8E%8B%E4%BA%94
     String decode = URLDecoder.decode("%E7%8E%8B%E4%BA%94", "utf-8")
     //王五
+    
+**补充：URLEncoder/URLDecoder 使用方法：**
+
+    String s="哈哈";
+    String s8 = URLEncoder.encode(s, "utf-8");
+    System.out.println(s8);
+    //%E5%93%88%E5%93%88
+
+    String so = URLDecoder.decode(s8, "iso-8859-1");
+    System.out.println(so);
+    //åå
+
+    byte[] b = so.getBytes("iso-8859-1");
+    String _s = new String(b, "utf-8");
+    System.out.println(_s);
+    //哈哈
+
+**补充：设置Tomcat编码方式**
+
+修改 Tomcat 配置文件 `conf/server.xml` 
+    
+    <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443"
+               URIEncoding="UTF-8" useBodyEncodingForURI="true"/>
+               
+* `URIEncoding` GET 请求编码方式，默认 iso-8859-1 
+
+* `useBodyEncodingForURI` 在 Tomcat4 中 GET/POST 的编码是一样的，所以只要在过滤器中通过 request.setCharacterEncoding 设定一次就可以解决 GET/POST 的问题。然而，在 Tomcat 高版本中，GET/POST 的处理是分开进行的，GET 请求通过 URIEncoding 进行处理，POST 请求通过 request.setCharacterEncoding 处理，为了保持兼容，就有了这个设定。
 
 ### 转发和重定向的区别：
 
-【重定向】
+**重定向**
 
     response.sendRedirect(String path);
 
-【转发】
+**转发**
 
     request.getRequestDispatcher(String path).forward(request,response);
     
-【区别】
+**区别**
 
 1. 转发的地址栏不变的；重定向的地址栏发生变化的。
 
