@@ -92,3 +92,82 @@ public class DownloadServlet extends HttpServlet {
     }
 }
 ```
+
+
+## Request 对象
+
+### Request 操作请求行
+
+    //获取请求方式
+    String method = req.getMethod();
+
+    //获取ip地址
+    String ip = req.getRemoteAddr();
+
+    //在java中获取项目名称
+    String path = req.getContextPath();
+
+    //获取从项目名到参数之前的内容 /login/check
+    String uri = req.getRequestURI();
+
+    //获取带协议的完整路径 http://login/check?name=join
+    String url = req.getRequestURL().toString();
+
+    //获取请求所有参数
+    String queryString = req.getQueryString();
+
+    //获取版本
+    String protocol = req.getProtocol();
+    
+### Request 请求参数
+
+获取参数的三种形式：
+
+```java
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+
+public class Servlet1 extends HttpServlet {
+
+    public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        //http://localhost:8080/hello?name=join&pic=a&pic=b
+        String name = req.getParameter("name");
+        System.out.println("name: " + name);
+        //name: join
+
+        String[] pics = req.getParameterValues("pic");
+        System.out.println("pics: " + Arrays.toString(pics));
+        //pics: [a, b]
+
+        Map<String, String[]> params = req.getParameterMap();
+
+        for(String key: params.keySet()) {
+            System.out.println(key + ": " + Arrays.toString(params.get(key)));
+            //name: [join]  pic: [a, b]
+        }
+    }
+}
+```
+
+### Request 中文乱码
+
+* GET 请求：参数追加在地址栏，使用 `utf-8` 编码，服务器(Tomcat)接受请求后使用 `ISO-8859-1` 解码
+ 
+* POST 请求：参数在请求体中，服务器(Tomcat)使用 `ISO-8859-1` 解码
+
+
+    //1、get/post请求
+    new String(name.getBytes("ISO-8859-1"), "utf-8");
+    
+    //2、post请求
+    req.setCharacterEncoding("UTF-8");
+    
+    //3、URLEncoder/URLDecoder
+    String encode = URLEncoder.encode("王五", "utf-8")
+    //%E7%8E%8B%E4%BA%94
+    String decode = URLDecoder.decode("%E7%8E%8B%E4%BA%94", "utf-8")
+    //王五
