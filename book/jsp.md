@@ -4,7 +4,7 @@ jsp 本质就是一个 servlet
 
 ### jsp 指令：
 
-### page指令: 声明jsp页面的一些属性
+#### page指令: 声明jsp页面的一些属性
 
     <%@ page language="java" contentType="text/html; charset=utf-8" %>
 
@@ -30,33 +30,35 @@ jsp 本质就是一个 servlet
 
 * `errorPage` 设置 JSP 页面中出现错误信息应该如何处理的。
 
-### include指令: 用于引入其他的页面
+#### include指令: 用于引入其他的页面
 
       <%@ include file="logo.jsp" %>
 
 * `file` 属性中不能使用变量，不能传递参数
 
-### taglib指令：用于在JSP中引入标签库
+#### taglib指令：用于在JSP中引入标签库
 
       <%@ taglib uri="名称空间" prefix="前缀" %>
 
-### jsp 9大内置对象 ☆☆☆
+### jsp内置对象和域对象
+
+#### jsp 9大内置对象 ☆☆☆
 
 jsp 页面上可以直接使用的对象
 
-对象 | 说明 | 
----- | ---- | ----
-`out` | JspWriter | 
-`request` | HttpServletRequest |
-`response` | HttpServletResponse |
-`session` | HttpSession |
-`exception` | Throwable |
-`page` | Servlet(this) |
-`pageContext` | pageContext |
-`config` | ServletConfig |
-`application` | ServletContext | 
+对象 | 说明 
+---- | ----
+`out` | JspWriter 
+`request` | HttpServletRequest
+`response` | HttpServletResponse
+`session` | HttpSession
+`exception` | Throwable
+`page` | Servlet(this)
+`pageContext` | pageContext
+`config` | ServletConfig
+`application` | ServletContext 
 
-### 	JSP的四个域对象：
+#### JSP的四个域对象：
 
 对象 | 作用范围 | 说明
 ---- | ---- | ---
@@ -64,6 +66,12 @@ pageContext | pageScope | 页面范围
 request | requestScope | 请求范围
 session | sessionScope | 会话范围
 application | applicationScope | 应用范围
+
+### JSP的动作标签：
+
+* 请求转发：`<jsp:forward page="/demo1/demo5.jsp"></jsp:forward>`
+
+* 动态包含：`<jsp:include page="/demo1/include2/logo.jsp"></jsp:include>`
 
 
 ### jsp 脚本：
@@ -260,3 +268,45 @@ public final class index_jsp extends org.apache.jasper.runtime.HttpJspBase
 }
 ```
 
+## EL表达式
+
+* 获取简单数据
+
+
+    ${pageScopt|requestScope|sessionScope|applicationScope.属性名} 
+    ${属性名}依次从pageContext, request, session, application查找指定的属性，若无则返回""
+
+* 获取复杂数据
+
+    * 获取数组中的数据 ${域中的名称[index]}
+    
+    * 获取list中的数据 ${域中的名称[index]}
+    
+    * 获取map中的数据 ${域中的名称.键名}
+    
+* javabean 导航
+
+
+    ${域中javabean名称.bean属性}
+
+**javabean 规范：**
+
+* 必须是一个公共的具体的类 public class
+
+* 提供私有的字段的方法 
+
+    
+    //username 即为一个字段
+    private String username; 
+
+* 提供公共访问字段的方法 get|set|is 方法
+
+    
+    //一旦有公共的方法后，get|set|is后的内容，将首字母小写，称之为bean属性
+    //name 就是一个bean属性
+    public String getName() {...}
+    
+
+* 提供一个无参构造器
+
+* 一般实现序列化接口 Serializable
