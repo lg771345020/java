@@ -585,7 +585,7 @@ ColumnListHandler | 将结果集中指定的列的字段值，封装到一个Lis
 KeyedHandler | 将结果集中每一条记录封装到Map<String,Object>,在将这个map集合做为另一个Map的value,另一个Map集合的key是指定的字段的值。
 MapHandler | 将结果集中第一条记录封装到了Map<String,Object>集合中，key就是字段名称，value就是字段值
 **MapListHandler** | 将结果集中每一条记录封装到了Map<String,Object>集合中，key就是字段名称，value就是字段值，在将这些Map封装到List集合中。
-**ScalarHandler** | 它是用于单数据。例如select count(*) from 表操作。
+**ScalarHandler** | 它是用于单数据，返回五long值。例如select count(*) from 表操作。
 
 ### DbUtils
 
@@ -595,3 +595,84 @@ MapHandler | 将结果集中第一条记录封装到了Map<String,Object>集合�
 
 * `rollbackAndCloseQuietly(Connection conn)` 回滚并关闭连接
 
+例子：
+
+```java
+import com.herolei.bean.Users;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.ArrayHandler;
+import org.apache.commons.dbutils.handlers.ArrayListHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class TestJdbc {
+
+    //1、获取连接池
+    ComboPooledDataSource dataSource = null;
+    //2、构造方法QueryRunner()，底层创建连接，创建语句执行者，释放资源
+    QueryRunner qr = null;
+
+    @Before
+    public void setUp() {
+        dataSource = new ComboPooledDataSource();
+        qr = new QueryRunner(dataSource);
+    }
+
+    @Test
+    public void update() throws Exception {
+        //3、编写SQL语句.
+        String sql = "insert into users values (null, ?, null)";
+        //4、执行sql
+        qr.update(sql, "Tom4"); //cud操作
+        //qr.query(sql, "Tom3");        //r操作
+    }
+
+    @Test
+    //将结果集中的第一条记录封装到一个Object[]数组中，数组中的每一个元素就是这条记录中的每一个字段的值
+    public void arrayHandler() throws Exception {
+        String sql = "select * from users";
+        Object[] query = qr.query(sql, new ArrayHandler());
+
+        for (Object obj: query) {
+            System.out.println(obj);
+        }
+    }
+
+    @Test
+    //将结果集中的每一条记录都封装到一个Object[]数组中，将这些数组在封装到List集合中
+    public void arrayListHandler() throws Exception {
+        String sql = "select * from users";
+        List<Object[]> list = qr.query(sql, new ArrayListHandler());
+
+        for (Object[] obj: list) {
+            System.out.println(Arrays.toString(obj));
+        }
+    }
+
+    @Test
+    //将结果集中第一条记录封装到一个指定的javaBean中
+    public void beanHandler() throws Exception {
+        String sql = "select * from users where id = 19";
+        Users user = (Users) qr.query(sql, new BeanHandler(Users.class));
+
+        System.out.println(user);
+    }
+
+    @Test
+    //将结果集中每一条记录封装到指定的javaBean中，将这些javaBean在封装到List集合中
+    public void beanListHandler() throws Exception {
+        String sql = "select * from users";
+        List<Users> list = (List<Users>) qr.query(sql, new BeanListHandler(Users.class));
+
+        for(Users user: list) {
+            System.out.println(user);
+        }
+    }
+}
+```
