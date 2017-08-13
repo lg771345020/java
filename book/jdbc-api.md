@@ -552,3 +552,46 @@ public class TestJdbc {
     }
 }
 ```
+
+## dbutils
+
+DBUtils 封装了对 JDBC 的操作，简化了 JDBC 操作。
+
+Dbutils 三个核心功能介绍：
+
+* [`QueryRunner`](#queryrunner) 提供对 sql 语句操作的 API 
+
+* [`ResultSetHandler`](#resultsethandler) 接口，用于定义 select 操作后，怎样封装结果集
+
+* [`DbUtils`](#dbutils) 工具类，定义了关闭资源与事务处理的方法
+
+### QueryRunner
+
+* `QueryRunner(DataSource ds)` 提供数据源（连接池），DBUtils底层自动维护连接connection
+
+* `update(String sql, Object... params)` 执行更新数据
+
+* `query(String sql, ResultSetHandler<T> rsh, Object... params)` 执行查询
+
+### ResultSetHandler
+
+结果集 | 说明
+---- | ----
+ArrayHandler | 将结果集中的第一条记录封装到一个Object[]数组中，数组中的每一个元素就是这条记录中的每一个字段的值
+ArrayListHandler | 将结果集中的每一条记录都封装到一个Object[]数组中，将这些数组在封装到List集合中。
+**BeanHandler** | 将结果集中第一条记录封装到一个指定的javaBean中。
+**BeanListHandler** | 将结果集中每一条记录封装到指定的javaBean中，将这些javaBean在封装到List集合中
+ColumnListHandler | 将结果集中指定的列的字段值，封装到一个List集合中
+KeyedHandler | 将结果集中每一条记录封装到Map<String,Object>,在将这个map集合做为另一个Map的value,另一个Map集合的key是指定的字段的值。
+MapHandler | 将结果集中第一条记录封装到了Map<String,Object>集合中，key就是字段名称，value就是字段值
+**MapListHandler** | 将结果集中每一条记录封装到了Map<String,Object>集合中，key就是字段名称，value就是字段值，在将这些Map封装到List集合中。
+**ScalarHandler** | 它是用于单数据。例如select count(*) from 表操作。
+
+### DbUtils
+
+* `closeQuietly(Connection conn)` 关闭连接，如果有异常 try 后不抛
+
+* `commitAndCloseQuietly(Connection conn)` 提交并关闭连接
+
+* `rollbackAndCloseQuietly(Connection conn)` 回滚并关闭连接
+
