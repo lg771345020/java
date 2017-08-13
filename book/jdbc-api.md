@@ -10,7 +10,7 @@ import org.junit.Test;
 public class TestJdbc {
 
     @Test
-    public void f2() throws Exception{
+    public void run1() throws Exception{
         //1、注册驱动
         Class.forName("com.mysql.jdbc.Driver");
         //DriverManager.registerDriver(new Driver());
@@ -86,9 +86,9 @@ public class TestJdbc {
 * getString(int|string): 若参数为int: 第几列，若参数为 string: 列名(字段名) getString getInt getObject
 
 
-### 实例，建立 mysql 数据库的连接
+### 实例，对 jdbc 进行简单的封闭
 
-创建 jdbc.properties 文件
+第一步：创建 jdbc.properties 文件
 
 ```
 driverClass=com.mysql.jdbc.Driver
@@ -97,7 +97,7 @@ user=root
 password=root
 ```
 
-创建 jdbc.java 文件
+第二步：创建 jdbcUtils.java 文件
 
 ```java
 import java.sql.Connection;
@@ -107,9 +107,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ResourceBundle;
-
-import org.junit.Test;
-
 
 public class jdbcUtils {
 
@@ -192,48 +189,56 @@ public class jdbcUtils {
 			rs = null;
 		}
 	}
-
-	@Test
-	public void f() {
-		Connection conn = null;
-		PreparedStatement st = null;
-		ResultSet rs = null;
-
-		try {
-			conn = jdbcUtils.getConnection();
-
-			//创建 sql
-			String sql = "insert into users (name) values (?)";
-
-			//获取语句执行者
-			st = conn.prepareStatement(sql);
-
-			//设置参数
-			st.setString(1, "sss");
-
-			//执行 sql
-			int i = st.executeUpdate();
-
-			//处理结果
-			if(i == 1) {
-				System.out.println("success");
-			} else {
-				System.out.println("fail");
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			//关闭连接资源
-			jdbcUtils.closeResource(conn, st, rs);
-		}
-	}
 }
 ```
 
-**补充：properties配置文件读取：**
+第三步：测试
 
-常见配置文件格式有 `properties`和`xml`两种
+```java
+import org.junit.Test;
+public class jdbcUtils {
+    
+    @Test
+    public void run2() {
+        Connection conn = null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        try {
+            conn = jdbcUtils.getConnection();
+
+            //创建 sql
+            String sql = "insert into users (name) values (?)";
+
+            //获取语句执行者
+            st = conn.prepareStatement(sql);
+
+            //设置参数
+            st.setString(1, "sss");
+
+            //执行 sql
+            int i = st.executeUpdate();
+
+            //处理结果
+            if(i == 1) {
+                System.out.println("success");
+            } else {
+                System.out.println("fail");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //关闭连接资源
+            jdbcUtils.closeResource(conn, st, rs);
+        }
+    }
+}
+```
+
+**补充：properties 配置文件读取：**
+
+常见配置文件格式有 `properties`和`xml`两种，`properties` 文件读取方式如下：
 
 ```java
 import java.util.ResourceBundle;
@@ -304,7 +309,7 @@ public class MyDataSource {
 }
 ```
 
-## 增强方法
+### 增强方法
 
 * 继承/实现
 
@@ -320,3 +325,230 @@ public class MyDataSource {
 
 * 动态代理
 
+### 增强连接池，实现 conn.close() 归还连接池：
+
+第一步：修改 MyDataSource.java 中 getConnection() 方法的返回值
+
+```
+System.out.println("获取连接");
+return new ConnectionWrap(pool.removeFirst(), pool);
+```
+
+第二步：新建 ConnectionWrap.java 对 Connection 的 close() 方法进行增强
+
+```java
+import java.sql.*;
+import java.util.LinkedList;
+
+public class ConnectionWrap implements Connection {
+    //连接池
+    private LinkedList pool;
+    private Connection conn;
+
+    public ConnectionWrap(Connection conn) {
+        this.conn = conn;
+    }
+
+    public ConnectionWrap(Connection conn, LinkedList pool) {
+        this.conn = conn;
+        this.pool = pool;
+    }
+
+    @Override
+    //修改close方法为归还连接池
+    public void close() throws SQLException {
+        this.pool.addLast(this.conn);
+        System.out.println("连接已经归还！");
+    }
+
+    @Override
+    //不用增强的方法调用原来的方法
+    public Statement createStatement() throws SQLException {
+        return conn.createStatement();
+    }
+
+    @Override
+    //不用增强的方法调用原来的方法
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
+        return conn.prepareStatement(sql);
+    }
+    
+    //...
+}
+```
+
+第三步：测试
+
+```java
+import org.junit.Test;
+
+public class TestJdbc {
+
+    @Test
+    public void run3() throws Exception{
+
+        MyDataSource dataSource = new MyDataSource();
+
+        ConnectionWrap conn = (ConnectionWrap) dataSource.getConnection();
+        conn.close();
+        //获取连接
+        //连接已经归还！
+    }
+}
+```
+
+### dbcp连接池
+
+第一步：导入 jar 包
+
+```
+commons-dbcp-1.4.jar
+commons-pool-1.5.6.jar
+```
+
+第二步：新建 src/main/resources/jdcp.properties 配置文件 
+
+```
+driverClassName=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/test
+username=root
+password=root
+```
+
+第三步：dbcp-api
+
+```java
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp.BasicDataSourceFactory;
+import org.junit.Test;
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Properties;
+
+public class TestJdbc {
+    @Test
+    public void dbcp() throws Exception{
+        //方法一：
+        /*BasicDataSource  dataSource = new BasicDataSource();
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/test");
+        dataSource.setUsername("root");
+        dataSource.setPassword("root");*/
+
+        //方法二：
+        Properties prop = new Properties();
+        /*prop.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+        prop.setProperty("url", "jdbc:mysql://localhost:3306/test");
+        prop.setProperty("username", "root");
+        prop.setProperty("password", "root");*/
+
+        prop.load(new FileInputStream("src/main/resources/jdcp.properties"));
+        BasicDataSource dataSource = (BasicDataSource) new BasicDataSourceFactory().createDataSource(prop);
+
+        //1、获得连接:
+        Connection conn = dataSource.getConnection();
+        //2、编写SQL语句.
+        String sql = "insert into users values (null, ?, null)";
+        //3、预编译SQL:
+        PreparedStatement st = conn.prepareStatement(sql);
+        //4、设置参数:
+        st.setString(1, "Tom");
+        //5、执行SQL
+        st.execute();
+        //6、关闭连接
+        st.close();
+        conn.close();
+    }
+}
+```
+
+### c3p0连接池(能自动回收空闲连接的功能)
+
+第一步：导入 jar 包 `c3p0-0.9.1.2.jar`
+
+第二步：c3p0 默认到 src/main/resources/c3p0.properties 读取配置文件
+
+```
+c3p0.driverClass=com.mysql.jdbc.Driver
+c3p0.jdbcUrl=jdbc:mysql://localhost:3306/test
+c3p0.user=root
+c3p0.password=root
+```
+
+或 c3p0 默认到 src/main/resources/c3p0-config.xml 读取配置文件
+
+```xml
+<c3p0-config>
+	<!-- 默认配置，如果没有指定则使用这个配置 -->
+	<default-config>
+		<!-- 基本配置 -->
+		<property name="driverClass">com.mysql.jdbc.Driver</property>
+		<property name="jdbcUrl">jdbc:mysql://localhost:3306/test</property>
+		<property name="user">root</property>
+		<property name="password">root</property>
+	
+		<!--扩展配置-->
+		<property name="checkoutTimeout">30000</property>
+		<property name="idleConnectionTestPeriod">30</property>
+		<property name="initialPoolSize">10</property>
+		<property name="maxIdleTime">30</property>
+		<property name="maxPoolSize">100</property>
+		<property name="minPoolSize">10</property>
+		<property name="maxStatements">200</property>
+	</default-config> 
+	
+	<!-- 命名的配置 -->
+	<named-config name="name">
+		<property name="driverClass">com.mysql.jdbc.Driver</property>
+		<property name="jdbcUrl">jdbc:mysql://127.0.0.1:3306/xxxx</property>
+		<property name="user">root</property>
+		<property name="password">1234</property>
+		
+		<!-- 如果池中数据连接不够时一次增长多少个 -->
+		<property name="acquireIncrement">5</property>
+		<property name="initialPoolSize">20</property>
+		<property name="minPoolSize">10</property>
+		<property name="maxPoolSize">40</property>
+		<property name="maxStatements">20</property>
+		<property name="maxStatementsPerConnection">5</property>
+	</named-config>
+</c3p0-config> 
+```
+
+第三步：c3p0-api
+
+```java
+import org.junit.Test;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+public class TestJdbc {
+    @Test
+    public void c3p0() throws Exception {
+        //默认到 src/main/resources/c3p0.properties 读取配置文件
+        ComboPooledDataSource dataSource = new ComboPooledDataSource();
+        //使用命名的配置，若找不到就使用默认的配置
+        //ComboPooledDataSource dataSource = new ComboPooledDataSource("name");
+        /*dataSource.setDriverClass("com.mysql.jdbc.Driver");
+        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/test");
+        dataSource.setUser("root");
+        dataSource.setPassword("root");*/
+
+        //1、获得连接:
+        Connection conn = dataSource.getConnection();
+        //2、编写SQL语句.
+        String sql = "insert into users values (null, ?, null)";
+        //3、预编译SQL:
+        PreparedStatement st = conn.prepareStatement(sql);
+        //4、设置参数:
+        st.setString(1, "Tom2");
+        //5、执行SQL
+        st.execute();
+        //6、关闭连接
+        st.close();
+        conn.close();
+    }
+}
+```
