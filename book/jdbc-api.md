@@ -1,6 +1,50 @@
-DriverManager: 管理一组 jdbc 的操作
+## Jdbc 基本操作
 
-将类加载到内存中方法：
+```java
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import org.junit.Test;
+
+public class TestJdbc {
+
+    @Test
+    public void f2() throws Exception{
+        //1、注册驱动
+        Class.forName("com.mysql.jdbc.Driver");
+        //DriverManager.registerDriver(new Driver());
+
+        //2、获取连接
+        //DriverManager 管理一组 jdbc 的操作
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "root");
+
+        //3、编写sql
+        String  sql="select * from users where name=?";
+
+        //4、创建语句执行者
+        PreparedStatement st = conn.prepareStatement(sql);
+
+        //5、设置参数
+        st.setString(1, "aaaa");
+
+        //6、执行sql
+        ResultSet rs = st.executeQuery();
+
+        //7、处理结果
+        while(rs.next()){
+            System.out.println(rs.getString("id") + "=>" + rs.getString("name"));
+        }
+
+        //8、释放资源.
+        rs.close();
+        st.close();
+        conn.close();
+    }
+}
+```
+
+**补充：将类加载到内存中方法：**
 
 * Class.forName("全限定名");//包名 + 类名  com.mysql.jdbc.Driver
 
@@ -9,9 +53,11 @@ DriverManager: 管理一组 jdbc 的操作
 * 对象.getClass()
 
 
-## getConnection()
+### DriverManager.getConnection()
 
-## Connection 类
+管理一组 jdbc 的操作
+
+### Connection 类
 
 * (了解)Statement createStatement(): 获取普通的语句执行者，会出现sql注入
 
@@ -23,8 +69,9 @@ DriverManager: 管理一组 jdbc 的操作
 * (了解)Commit(): 提交事务
 * (了解)rollback(): 事务回滚
 
-## Statement 语句执行者 接口 有注入
-## PreparedStatement 预编译的语句执行者 接口
+### PreparedStatement 预编译的语句执行者 接口
+
+父类 `Statement` 语句执行者 接口 有注入
 
 * setString(int 第几个？号, object)
 * setInt(int 第几个？号, object)
@@ -32,30 +79,12 @@ DriverManager: 管理一组 jdbc 的操作
 * executeQuery(sql): 执行 r 语句，返回值：结果集
 * executeUpdate(): 执行 cud 语句，返回值：影响的行数
 
-## ResultSet: 结果集 接口
+### ResultSet: 结果集 接口
 
 * next(): 判断是否有下一条记录，若有返回true且将光标移动到下一行，若没有则返回false。光标一开始处于第一条记录的上面。
 
 * getString(int|string): 若参数为int: 第几列，若参数为 string: 列名(字段名) getString getInt getObject
 
-
-## 常见配置文件格式
-
-* .properties 内容格式为 key=value
-
-* .xml
-
-## 获取配置文件信息
-
-```java
-import java.util.ResourceBundle;
-
-//①获取 ResourceBundle 对象
-ResourceBundle bundle = ResourceBundle.getBundle("jdbc");
-
-//①通过 ResourceBundle 对象获取配置信息
-String driverClass = bundle.getString("driverClass");
-```
 
 ### 实例，建立 mysql 数据库的连接
 
@@ -202,6 +231,24 @@ public class jdbcUtils {
 }
 ```
 
+**补充：properties配置文件读取：**
+
+常见配置文件格式有 `properties`和`xml`两种
+
+```java
+import java.util.ResourceBundle;
+
+public class TestProperties {
+    @Test
+    public void read() throws Exception{
+        //①获取 ResourceBundle 对象
+        ResourceBundle bundle = ResourceBundle.getBundle("jdbc");
+        
+        //①通过 ResourceBundle 对象获取配置信息
+        String driverClass = bundle.getString("driverClass");
+    }
+}
+```
 
 ## 连接池
 
