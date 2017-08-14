@@ -149,7 +149,7 @@ public class UserBean implements HttpSessionBindingListener {
 
 #### HttpSessionActivationListener案例
 
-第一步：UserBean 实现 HttpSessionActivationListener 接口和 Serializable 序列化接口
+第一步：UserBean 实现 HttpSessionActivationListener 接口和 Serializable 序列化接口(必须)
 
 ```java
 package com.herolei.bean;
@@ -203,7 +203,7 @@ public class UserBean implements HttpSessionBindingListener, HttpSessionActivati
 }
 ```
 
-第二步：新建 webapp/META-INF/context.xml 文件
+第二步：新建 webapp/META-INF/context.xml 文件，设置 session 存储时间和存储地址
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -218,3 +218,119 @@ public class UserBean implements HttpSessionBindingListener, HttpSessionActivati
 </Context>
 ```
 
+## Filter过滤器
+
+一个实现了特殊接口的 Java 类.实现对请求资源的过滤的功能，如自动登录、解决网站乱码、进行页面静态化、响应压缩...
+
+### Servlet的生命周期(了解)
+
+Filter 生命周期：过滤器从创建到销毁的过程.
+
+* 创建：服务器启动的时候，服务器就会创建过滤器的对象
+* 执行：每次访问被拦截目标资源，过滤器中的 doFilter 的方法就会执行
+* 销毁：当服务器关闭的时候，服务器就会销毁 Filter 对象
+
+注意：servlet 默认在第一次请求到来时创建
+
+### FilterChain过滤器链
+
+过滤器链中的过滤器的执行的顺序跟 <filter-mapping> 的配置顺序有关
+
+例子
+
+第一步：配制 web.xml 文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
+
+    <filter>
+        <filter-name>AFilter</filter-name>
+        <filter-class>com.herolei.filter.AFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>BFilter</filter-name>
+        <filter-class>com.herolei.filter.BFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>BFilter</filter-name>
+        <url-pattern>/index.jsp</url-pattern>
+    </filter-mapping>
+    
+</web-app>
+```
+
+第二步：新建 com.herolei.filter.AFilter 类
+
+```java
+package com.herolei.filter;
+
+import javax.servlet.*;
+import java.io.IOException;
+
+public class AFilter implements Filter {
+    @Override
+    //过滤器初始化
+    public void init(FilterConfig filterConfig) throws ServletException { }
+
+    @Override
+    //业务处理
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        System.out.println("aFilter 收到请求");
+
+        chain.doFilter(request, response);
+
+        System.out.println("aFilter 收到响应");
+    }
+
+    @Override
+    //过滤器销毁
+    public void destroy() {}
+}
+```
+
+第三步：新建 com.herolei.filter.BFilter 类
+
+```java
+package com.herolei.filter;
+
+import javax.servlet.*;
+import java.io.IOException;
+
+public class BFilter implements Filter {
+    @Override
+    //过滤器初始化
+    public void init(FilterConfig filterConfig) throws ServletException { }
+
+    @Override
+    //业务处理
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        System.out.println("bFilter 收到请求");
+
+        chain.doFilter(request, response);
+
+        System.out.println("bFilter 收到响应");
+    }
+
+    @Override
+    //过滤器销毁
+    public void destroy() {}
+}
+```
+
+访问 index.jsp 页面，结果如下：
+
+```
+aFilter 收到请求
+bFilter 收到请求
+//处理请求
+bFilter 收到响应
+aFilter 收到响应
+```
