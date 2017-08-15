@@ -17,3 +17,14 @@ tools.jar - part of VM
 ```
 
 我之前将 servlet-api.jar 包拷贝到 C:\Program Files (x86)\Java\jdk1.8.0_131\jre\lib\ext 目录下，删除 servlet-api.jar 后，项目正常跑起来了。
+
+### maven引入servlet依赖，并把其scope设置为provided
+
+```xml
+<dependency>  
+    <groupId>javax.servlet</groupId>  
+    <artifactId>servlet-api</artifactId>  
+    <version>2.5</version>  
+    <scope>provided</scope>  
+</dependency> 
+```
