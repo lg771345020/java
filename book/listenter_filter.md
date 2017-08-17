@@ -334,3 +334,296 @@ bFilter 收到请求
 bFilter 收到响应
 aFilter 收到响应
 ```
+
+### Filter实现自动登陆
+
+第一步：新建项目，目录如下:
+
+```
+
+```
+
+第二步：修改配置文件 WEB-INF/web.xml ，添加过滤器
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+         http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+  <filter>
+    <filter-name>AutoLoginFilter</filter-name>
+    <filter-class>com.herolei.filter.AutoLoginFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>AutoLoginFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <servlet>
+    <servlet-name>LoginServlet</servlet-name>
+    <servlet-class>com.herolei.controller.LoginServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LoginServlet</servlet-name>
+    <url-pattern>/login</url-pattern>
+  </servlet-mapping>
+</web-app>
+```
+
+第三步：添加 com.herolei.utils.CookieUtils 工具类
+
+```java
+package com.herolei.utils;
+
+import javax.servlet.http.Cookie;
+
+public class CookieUtils {
+    //获取cookie
+    public static String getCookie(String name, Cookie[] cookies) {
+        if(cookies != null) {
+            for(Cookie c: cookies) {
+                if(name.equals(c.getName())) {
+                    return c.getValue();
+                }
+            }
+        }
+        return "";
+    }
+}
+```
+
+第四步：添加 com.herolei.bean.UserBean 用户类 和 com.herolei.bean.ConstantBean 常量类
+
+```java
+package com.herolei.bean;
+
+public class UserBean {
+
+    private String name;
+    private String password;
+
+    public UserBean(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+```
+
+```java
+package com.herolei.bean;
+
+public interface ConstantBean {
+
+    String ISAUTOLOGIN = "1";
+    String ISREMEMBER = "1";
+}
+```
+
+第五步：验证登陆 com.herolei.controller.LoginServlet
+
+添加 com.herolei.service.LoginService ，Service 层验证登陆
+
+```java
+package com.herolei.service;
+
+public class LoginService {
+    //验证登陆是否成功
+    public boolean loginCheck(String username, String password) {
+        return "admin".equals(username) && "adminadmin".equals(password);
+    }
+}
+```
+
+添加 com.herolei.controller.LoginServlet ，Control 层验证登陆
+
+```java
+package com.herolei.controller;
+
+import com.herolei.bean.ConstantBean;
+import com.herolei.bean.UserBean;
+import com.herolei.service.LoginService;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
+import java.io.IOException;
+
+public class LoginServlet extends HttpServlet {
+
+    public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        req.setCharacterEncoding("utf-8");
+        String username = req.getParameter("username");
+        String password = req.getParameter("password");
+        String isRemember = req.getParameter("isRemember");
+        String isAutoLogin = req.getParameter("isAutoLogin");
+        //cookie有效期单位为s
+        int maxAge = 60 * 10;
+
+        //勾选记住我，将用户名和密码存储到cookie中
+        if(ConstantBean.ISREMEMBER .equals(isRemember)) {
+            Cookie cusername = new Cookie("username", username);
+            cusername.setMaxAge(maxAge);
+            cusername.setPath(req.getContextPath());
+            Cookie cpassword = new Cookie("password", password);
+            cpassword.setMaxAge(maxAge);
+            cpassword.setPath(req.getContextPath());
+            res.addCookie(cusername);
+            res.addCookie(cpassword);
+        }
+
+        //勾选自动登陆，将是否自动登陆存储到cookie中
+        if(ConstantBean.ISAUTOLOGIN.equals(isAutoLogin)) {
+            Cookie cisAutoLogin = new Cookie("isAutoLogin", isAutoLogin);
+            cisAutoLogin.setMaxAge(maxAge);
+            cisAutoLogin.setPath(req.getContextPath());
+            res.addCookie(cisAutoLogin);
+        }
+
+        LoginService loginService = new LoginService();
+        //登陆成功
+        if(loginService.loginCheck(username, password)) {
+            HttpSession session = req.getSession();
+            session.setAttribute("user", new UserBean(username, password));
+            res.sendRedirect("index.jsp");
+        //登陆失败
+        } else {
+            String msg = "POST".equals(req.getMethod()) ? "用户名或密码错误！" : "";
+            req.setAttribute("msg", msg);
+            req.getRequestDispatcher("login.jsp").forward(req, res);
+        };
+    }
+}
+```
+
+第六步：添加 com.herolei.filter.AutoLoginFilter ，实现自动登陆验证
+
+```java
+package com.herolei.filter;
+
+import com.herolei.bean.ConstantBean;
+import com.herolei.bean.UserBean;
+import com.herolei.utils.CookieUtils;
+import com.herolei.service.LoginService;
+
+import javax.servlet.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+
+public class AutoLoginFilter implements Filter {
+    public void init(FilterConfig filterConfig) throws ServletException {}
+
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) servletRequest;
+        HttpServletResponse res = (HttpServletResponse) servletResponse;
+        HttpSession session = req.getSession();
+        Cookie[] cookies = req.getCookies();
+
+        //用户已经登陆，放行
+        if(session.getAttribute("user") != null) {
+            System.out.println("用户已经登陆！");
+            filterChain.doFilter(req, res);
+        //访问登陆注册页面，放行
+        } else if(req.getRequestURI().contains("/login")) {
+            System.out.println(2222222);
+            filterChain.doFilter(req, res);
+        //cookie不为空时，勾选自动登陆时，验证用户名密码是否正确，正确则放行，错误跳转到登陆页面
+        //              没有勾选自动登陆，则跳转到登陆页面
+        } else if(cookies != null) {
+
+            String username = CookieUtils.getCookie("username", req.getCookies());
+            String password = CookieUtils.getCookie("password", req.getCookies());
+            String isAutoLogin = CookieUtils.getCookie("isAutoLogin", req.getCookies());
+            //勾选自动登陆
+            if(ConstantBean.ISAUTOLOGIN.equals(isAutoLogin)) {
+                LoginService loginService = new LoginService();
+                if(loginService.loginCheck(username, password)) {
+                    filterChain.doFilter(req, res);
+                    session.setAttribute("user", new UserBean(username, password));
+                } else {
+                    res.sendRedirect("/login");
+                }
+            } else {
+                res.sendRedirect("/login");
+            }
+        //cookie为空时，放行
+        } else {
+            System.out.println(11111);
+            res.sendRedirect("/login");
+            //req.getRequestDispatcher("/login").forward(req, res);
+        }
+    }
+
+    public void destroy() {}
+}
+```
+
+第七步：添加 jsp 文件
+
+添加 index.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=utf-8" %>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+欢迎来到首页
+<a href="/logout.jsp">退出登陆</a>
+</body>
+</html>
+```
+
+添加 login.jsp
+
+```jsp
+<%@ page language="java" contentType="text/html; charset=utf-8" %>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<form action="/login" method="post">
+    用户名：<input type="text" name="username"><br>
+    密 码：<input type="text" name="password"><br>
+    <input type="checkbox" name="isRemember" value="1">记住我
+    <input type="checkbox" name="isAutoLogin" value="1">自动登陆<br>
+    <input type="submit" value="提交">${msg}
+</form>
+</body>
+</html>
+```
+
+添加 logout.jsp 
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    session.removeAttribute("user");
+%>
+退出登陆
+```
