@@ -222,8 +222,6 @@ public class UserBean implements HttpSessionBindingListener, HttpSessionActivati
 
 一个实现了特殊接口的 Java 类.实现对请求资源的过滤的功能，如自动登录、解决网站乱码、进行页面静态化、响应压缩...
 
-### Servlet的生命周期(了解)
-
 Filter 生命周期：过滤器从创建到销毁的过程.
 
 * 创建：服务器启动的时候，服务器就会创建过滤器的对象
@@ -540,11 +538,9 @@ public class AutoLoginFilter implements Filter {
 
         //用户已经登陆，放行
         if(session.getAttribute("user") != null) {
-            System.out.println("用户已经登陆！");
             filterChain.doFilter(req, res);
         //访问登陆注册页面，放行
         } else if(req.getRequestURI().contains("/login")) {
-            System.out.println(2222222);
             filterChain.doFilter(req, res);
         //cookie不为空时，勾选自动登陆时，验证用户名密码是否正确，正确则放行，错误跳转到登陆页面
         //              没有勾选自动登陆，则跳转到登陆页面
