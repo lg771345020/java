@@ -69,3 +69,79 @@ String value = root.attrbuteValue("属性名");
 String text = ele.elementText(子标签名称);
 ```
 
+### 使用配制文件解耦合
+
+创建 BeanFactory.java 文件
+
+```java
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+public class BeanFactory {
+
+    public static Object getBean(String id) {
+        try {
+            //1.获取document
+            Document document = new SAXReader().read(BeanFactory.class.getClassLoader().getResourceAsStream("beans.xml"));
+            //2.获取要初始化的元素
+            Element ele = (Element) document.selectSingleNode("//bean[@id='" + id + "']");
+            //3.获取类名
+            String aClass = ele.attributeValue("class");
+            //4.反射
+            return Class.forName(aClass).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //没有获取该对象则返回null
+        return null;
+    }
+}
+```
+测试：
+
+第一步：新建配制文件 beans.xml 
+
+```xml
+<beans>
+    <bean id="user" class="com.herolei.bean.UserBean"></bean>
+</beans>
+```
+
+第二步：创建 com.herolei.bean.UserBean 类
+
+```java
+package com.herolei.bean;
+
+public class UserBean {
+
+    private String username;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+}
+```
+
+第三步：新建 TestBeanFactory.java 测试类
+
+```java
+import com.herolei.bean.UserBean;
+import org.junit.Test;
+
+public class TestBeanFactory {
+
+    @Test
+    public void test1() {
+        UserBean user = (UserBean) BeanFactory.getBean("user");
+        user.setUsername("join");
+        System.out.println(user.getUsername());
+        // => join
+    }
+}
+```
+
