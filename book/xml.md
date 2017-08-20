@@ -145,3 +145,58 @@ public class TestBeanFactory {
 }
 ```
 
+### 升级：Service层add方法实现增强
+
+动态代理实现 Service 层 add() 方法增强，Proxy 必须有实现接口才能实现动态代理
+
+```java
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+public class BeanFactory {
+
+    public static Object getBean(String id) {
+        try {
+            //1.获取document
+            Document document = new SAXReader().read(BeanFactory.class.getClassLoader().getResourceAsStream("beans.xml"));
+            //2.获取指定的bean对象
+            Element ele = (Element) document.selectSingleNode("//bean[@id='" + id + "']");
+            //3.获取类名
+            String aClass = ele.attributeValue("class");
+            //4.反射
+            //return Class.forName(aClass).newInstance();
+
+            //5.动态代理，对service层的add方法进行增强
+            final Object obj = Class.forName(aClass).newInstance();
+            if(id.endsWith("Service")) {
+                return Proxy.newProxyInstance(obj.getClass().getClassLoader(), obj.getClass().getInterfaces(), new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        //增强add方法
+                        if(method.getName().startsWith("add")) {
+                            System.out.println("add 方法增强开始...");
+                            Object invoke = method.invoke(obj, args);
+                            System.out.println("add 方法增强结束...");
+                            return invoke;
+                        }
+                        return method.invoke(obj, args);
+                    }
+                });
+            } else {
+                return obj;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //没有获取该对象则返回null
+        return null;
+    }
+}
+```
+
