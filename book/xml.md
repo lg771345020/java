@@ -100,7 +100,7 @@ public class BeanFactory {
 ```
 测试：
 
-第一步：新建配制文件 beans.xml 
+第一步：新建配制文件 src/main/resources/beans.xml
 
 ```xml
 <beans>
