@@ -83,3 +83,18 @@ select * from test1;
 * 012 前多个 0，int(M) 的值多了个0，这就是显示宽度的限制
 
 * zerofill 的时候系统会给自动添加上 unsigned 属性，就是非负数。而设置的显示宽度为3位，所以就会输出 000 
+
+### MySQL--删除表数据drop、truncate和delete的用法
+
+* `drop table 表名` 删除整个表
+
+        drop table  dbo.Sys_Test
+        
+* `truncate table 表名` 清空表中的数据，删除内容、释放空间但不删除定义(保留表的数据结构)。与drop不同的是,只是清空表数据而已。
+
+        truncate  table dbo.Sys_Test    
+                      
+* `delete from 表名 where 列名 = 值` 删除表中的行。delete语句执行删除的过程是每次从表中删除一行，并且同时将该行的删除操作作为事务记录在日志中保存
+以便进行进行回滚操作。
+
+        delete from dbo.Sys_Test where test='test'
