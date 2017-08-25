@@ -13,7 +13,9 @@ D: delete 删除
 
 INT(1) 和 INT(10)本身没有区别，但是加上(M)值后，会有显示宽度的设置。
 
-示例如代码如下：`test` 表不设置 INT[(M)]
+示例如代码如下：
+
+第一步：`test` 表不设置 INT[(M)]
 
 ```mysql
 DROP TABLE IF EXISTS `test`;
@@ -39,7 +41,7 @@ select * from test;
 +-------+
 ```
 
-`test1` 表设置 INT[(M)]
+第二步：`test1` 表设置 INT[(M)]
 
 ```mysql
 DROP TABLE IF EXISTS test1;
