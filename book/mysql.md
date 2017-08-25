@@ -13,6 +13,8 @@ D: delete 删除
 
 INT(1) 和 INT(10)本身没有区别，但是加上(M)值后，会有显示宽度的设置。
 
+示例如代码如下：`test` 表不设置 INT[(M)]
+
 ```mysql
 DROP TABLE IF EXISTS `test`;
 CREATE TABLE `test` (
@@ -22,6 +24,7 @@ CREATE TABLE `test` (
 insert into test values(12);
 insert into test values(123);
 insert into test values(-123);
+
 select * from test;
 ```
 `test` 表查询结果正常显示：
@@ -36,13 +39,18 @@ select * from test;
 +-------+
 ```
 
+`test1` 表设置 INT[(M)]
+
 ```mysql
 DROP TABLE IF EXISTS test1;
-create table test1(id int(3) zerofill);
+create table test1(
+  id int(3) zerofill DEFAULT NULL
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert into test1 value(12);
 insert into test1 value(1234);
 insert into test1 value(-1234);
+
 select * from test1;
 ```
 
