@@ -2,8 +2,7 @@
 
 ### 一． Hosts文件的位置   
 
-    \%Systemroot%\System32\Drivers\Etc 
-    %Systemroot%指系统安装路径。例如，Windows XP 安装在C:\WINDOWS    
+    C:\Windows\System32\drivers\etc
 
 ### 二． Hosts文件的基本内容和语法  
 
@@ -53,7 +52,7 @@
 
 ```
 127.0.0.1 # 要屏蔽的网站 A    
-0.0.0.0 # 要屏蔽的网站 B    
+0.0.0.0   # 要屏蔽的网站 B    
 ```
 
 这样，计算机解析域名 A和 B时，就解析到本机IP或错误的IP，达到了屏蔽网站A 和B的目的。    
