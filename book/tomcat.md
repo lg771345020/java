@@ -7,9 +7,9 @@
 2、将 apache-tomcat-8.5.20.tar.gz 解压，并复制到 /usr/local/tomcat 目录下。
 
 ```
-①解压
+#①解压
 tar -zxvf apache-tomcat-8.5.20.tar.gz
-②复制
+#②复制
 mv apache-tomcat-8.5.20 /usr/local/tomcat
 ```
 
