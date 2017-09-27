@@ -10,7 +10,7 @@
 </tomcat-users>
 ```
 
-第二步：修改 Tomcat/conf/context.xml ，注释 <Value /> 标签
+第二步：修改 Tomcat/conf/context.xml 和 Tomcat/webapps/manager/META-INF/context.xml，注释 <Value /> 标签
 
 ```xml
 <Context antiResourceLocking="false" privileged="true" >
