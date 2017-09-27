@@ -52,3 +52,9 @@
 　　java version "1.8.0_60"
 　　Java(TM) SE Runtime Environment (build 1.8.0_60-b27)
 　　Java HotSpot(TM) Client VM (build 25.60-b23, mixed mode)
+
+
+### 参考
+1. [/etc/profile文件详解](http://blog.chinaunix.net/uid-25749806-id-298287.html)
+1. [Linux 各目录及每个目录的详细介绍](http://www.linuxidc.com/Linux/2013-01/77368.htm)
+1. [Linux下安装Java环境配置步骤详述](http://www.cnblogs.com/zeze/p/5902124.html)
