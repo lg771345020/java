@@ -1,6 +1,22 @@
-## Tomcat 部署
+## Tomcat 安装
 
-第一步：修改 Tomcat/conf/tomcat-users.xml ，添加用户 manager-gui 和 admin-gui 用户
+1、下载Tomcat
+
+登录网址：http://tomcat.apache.org/download-80.cgi
+
+2、将apache-tomcat-8.5.20.tar.gz拷贝到tomcat目录下
+
+    cp apache-tomcat-8.5.20.tar.gz /usr/local/tomcat/
+
+3、解压tomcat到当前目录,得到文件夹 apache-tomcat-8.5.20
+
+    tar -zxvf apache-tomcat-8.5.20.tar.gz
+
+tomcat 安装完毕！
+
+## Tomcat 配置
+
+1、修改 Tomcat/conf/tomcat-users.xml ，添加用户 manager-gui 和 admin-gui 用户
 
 ```xml
 <tomcat-users>
@@ -10,7 +26,7 @@
 </tomcat-users>
 ```
 
-第二步：修改 Tomcat/conf/context.xml 和 Tomcat/webapps/manager/META-INF/context.xml，注释 <Value /> 标签
+2、修改 Tomcat/conf/context.xml 和 Tomcat/webapps/manager/META-INF/context.xml，注释 <Value /> 标签
 
 ```xml
 <Context antiResourceLocking="false" privileged="true" >
@@ -25,6 +41,6 @@
 </Context>
 ```
 
-第三步，启动 Tomcat ，访问 localhost:8080/manager，输入用户名密码，即可跳转到 `localhost:8080/manager/html` 管理页面
+3、启动 Tomcat ，访问 localhost:8080/manager，输入用户名密码，即可跳转到 `localhost:8080/manager/html` 管理页面
 
 如若仍不能访问，可按以上方法修改 Tomcat/webapps/manager/META-INF/context.xml 即可。
