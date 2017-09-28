@@ -61,7 +61,7 @@ tomcat 安装完毕！
 [root@localhost logs]# tail -f catalina.out
 ```
 
-**补充：**tail命令
+**补充：** tail命令
 ```
 head -6 catalina.out  ## 前 6 行
 tail -25 catalina.out ## 最后的 25 行
