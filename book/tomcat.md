@@ -45,3 +45,26 @@ tomcat 安装完毕！
 3、启动 Tomcat ，访问 localhost:8080/manager，输入用户名密码，即可跳转到 `localhost:8080/manager/html` 管理页面
 
 如若仍不能访问，可按以上方法修改 Tomcat/webapps/manager/META-INF/context.xml 即可。
+
+```
+#进入tomcat/bin目录
+[root@localhost ~]# cd /usr/local/tomcat/apache-tomcat-8.5.20/bin
+#启动tomcat
+[root@localhost bin]# ./startup.sh 
+#关闭tomcat
+[root@localhost bin]# ./shutdown.sh
+#启动tomcat并显示控制台日志信息
+[root@localhost bin]# ./catalina.sh run
+#进入tomcat/logs目录
+[root@localhost bin]# cd /usr/local/tomcat/apache-tomcat-8.5.20/logs
+#查看tomcat日志
+[root@localhost logs]# tail -f catalina.out
+```
+
+**补充：**tail命令
+```
+head -6 catalina.out  ## 前 6 行
+tail -25 catalina.out ## 最后的 25 行
+head -20 file | tail -10   ##第 11 行到第 20 行
+tail -f catalina.out  ##参数-f使tail不停地去读最新的内容，有实时监视的效果
+```
