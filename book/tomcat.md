@@ -68,3 +68,9 @@ tail -25 catalina.out ## 最后的 25 行
 head -20 file | tail -10   ##第 11 行到第 20 行
 tail -f catalina.out  ##参数-f使tail不停地去读最新的内容，有实时监视的效果
 ```
+```
+vim /etc/profile.d/tomcat.sh
+export CATALINA_HOME=/usr/local/tomcat
+export PATH=$CATALINA_HOME/bin:$PATH
+. /etc/profile.d/tomcat.sh
+```
