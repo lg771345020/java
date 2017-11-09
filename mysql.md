@@ -39,6 +39,7 @@
 default-character-set=utf8 
 socket=/var/lib/mysql/mysql.sock
 [mysqld]
+user=mysql
 skip-name-resolve
 #设置3306端口
 port = 3306 
